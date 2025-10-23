@@ -1,0 +1,187 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-surface">
+  <!-- Contenido -->
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar Filters -->
+      <div class="lg:col-span-1">
+        <app-card>
+          <h3 class="font-serif font-semibold mb-4">Filtros</h3>
+
+          <!-- Search -->
+          <div class="mb-6">
+            <app-input
+              placeholder="Buscar productos..."
+              [value]="searchTerm()"
+              (input)="onSearchInput($event)"
+            ></app-input>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-sm mb-3">Categoría</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="category"
+                  value="all"
+                  [checked]="selectedCategory() === 'all'"
+                  (change)="onCategoryChange($event)"
+                  class="w-4 h-4"
+                />
+                <span class="text-sm">Todas</span>
+              </label>
+
+              @for (cat of categories(); track cat) {
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="category"
+                    [value]="cat"
+                    [checked]="selectedCategory() === cat"
+                    (change)="onCategoryChange($event)"
+                    class="w-4 h-4"
+                  />
+                  <span class="text-sm">{{ cat }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Brand -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-sm mb-3">Marca</h4>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="brand"
+                  value="all"
+                  [checked]="selectedBrand() === 'all'"
+                  (change)="onBrandChange($event)"
+                  class="w-4 h-4"
+                />
+                <span class="text-sm">Todas</span>
+              </label>
+
+              @for (brand of brands(); track brand) {
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="brand"
+                    [value]="brand"
+                    [checked]="selectedBrand() === brand"
+                    (change)="onBrandChange($event)"
+                    class="w-4 h-4"
+                  />
+                  <span class="text-sm">{{ brand }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div>
+            <h4 class="font-semibold text-sm mb-3">Rango de Precio</h4>
+            <div class="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max="5000"
+                [value]="priceRange()[1]"
+                (input)="onPriceMaxInput($event)"
+                class="w-full"
+              />
+              <div class="flex justify-between text-sm text-text-muted">
+                <span>S/ {{ priceRange()[0] }}</span>
+                <span>S/ {{ priceRange()[1] }}</span>
+              </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="lg:col-span-3">
+        <!-- Sort Bar -->
+        <div class="flex justify-between items-center mb-6">
+          <p class="w-full border border-gray-300 px-3 py-1 rounded-md mr-4">
+            Mostrando {{ filteredProducts().length }} productos
+          </p>
+
+          <select
+            [value]="sortBy()"
+            (change)="onSortChange($event)"
+            class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-foreground"
+          >
+            <option value="newest">Más nuevos</option>
+            <option value="price-low">Precio: Menor a Mayor</option>
+            <option value="price-high">Precio: Mayor a Menor</option>
+            <option value="popular">Más populares</option>
+          </select>
+        </div>
+
+        <!-- Products -->
+        @if (filteredProducts().length > 0) {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+  @for (product of filteredProducts(); track product.id) {
+    <app-card [hover]="true" class="flex flex-col justify-between h-full min-h-[420px]">
+      <div class="relative mb-4 h-48 bg-surface rounded-lg overflow-hidden flex items-center justify-center">
+        <img
+          [src]="product.image || '/placeholder.svg'"
+          [alt]="product.name"
+          width="200"
+          height="200"
+          class="object-cover"
+        />
+      </div>
+
+      <div class="mb-3 flex-1">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-serif font-semibold text-lg flex-1">
+            {{ product.name }}
+          </h3>
+          <app-badge [variant]="getStockBadgeVariant(product.stock)">
+            {{
+              product.stock === 0
+                ? 'Agotado'
+                : product.stock <= 5
+                ? 'Bajo stock'
+                : 'En stock'
+            }}
+          </app-badge>
+        </div>
+        <p class="text-sm text-text-muted mb-3">
+          {{ product.category }} • {{ product.brand }}
+        </p>
+      </div>
+
+      <div>
+        <p class="text-2xl font-bold text-primary mb-4">
+          {{ product.price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+        </p>
+        <app-button class="w-full h-[44px]" [disabled]="product.stock === 0">
+          {{ product.stock === 0 ? 'Agotado' : 'Añadir al carrito' }}
+        </app-button>
+      </div>
+    </app-card>
+  }
+</div>
+        } @else {
+          <app-card>
+            <div class="text-center py-12">
+              <p class="text-text-muted mb-4">
+                No se encontraron productos con los filtros seleccionados.
+              </p>
+              <app-button variant="secondary" (click)="clearFilters()">
+                Limpiar filtros
+              </app-button>
+            </div>
+          </app-card>
+        }
+      </div>
+    </div>
+  </div>
+</main>
