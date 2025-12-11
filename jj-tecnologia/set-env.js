@@ -4,7 +4,7 @@ const targetPath = './src/environments/environment.ts';
 
 const envFileContent = `
 export const environment = {
-  production: false,
+  production: true,
   supabaseUrl: '${process.env.SUPABASE_URL}',
   supabaseKey: '${process.env.SUPABASE_KEY}',
 };
