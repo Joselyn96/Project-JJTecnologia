@@ -1,0 +1,33 @@
+<div>
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-slate-800">
+      Ventas - 
+      @if (selectedPeriod === 'day') { Últimos 15 días }
+      @else if (selectedPeriod === 'week') { Últimas 8 semanas }
+      @else { Últimos 6 meses }
+    </h2>
+
+    <div class="inline-flex rounded-full bg-slate-100 p-1 text-[11px]">
+      <button class="px-3 py-1 rounded-full"
+        [ngClass]="selectedPeriod === 'day' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+        (click)="changePeriod('day')">
+        Día
+      </button>
+      <button class="px-3 py-1 rounded-full"
+        [ngClass]="selectedPeriod === 'week' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+        (click)="changePeriod('week')">
+        Semana
+      </button>
+      <button class="px-3 py-1 rounded-full"
+        [ngClass]="selectedPeriod === 'month' ? 'bg-white shadow text-slate-900' : 'text-slate-500'"
+        (click)="changePeriod('month')">
+        Mes
+      </button>
+    </div>
+  </div>
+
+    <!-- CANVAS DEL GRÁFICO -->
+    <div style="height: 300px;">
+        <canvas #canvas></canvas>
+    </div>
+</div>

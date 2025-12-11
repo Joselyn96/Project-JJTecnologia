@@ -15,7 +15,7 @@ export class CardComponent {
   cardClasses = computed(() => {
     const base = 'bg-white rounded-2xl border border-gray-200 shadow-sm p-6';
     const hoverEffect = this.hover() 
-      ? 'transition-all duration-300 ease-in-out hover:shadow-md hover:border-primary/20 cursor-pointer' 
+      ? 'transition-all duration-300 ease-in-out hover:shadow-md hover:border-primary/20' 
       : '';
     
     return `${base} ${hoverEffect} ${this.className()}`.trim();

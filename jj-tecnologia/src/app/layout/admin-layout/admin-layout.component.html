@@ -1,0 +1,89 @@
+<!-- admin-layout.component.html -->
+<div class="min-h-screen bg-slate-100 flex flex-col">
+
+  <!-- NAVBAR SUPERIOR -->
+  <header class="w-full border-b border-gray-200 bg-white flex items-center justify-between px-6 py-3">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12">
+        <img src="logo_navbar_blanco.png" alt="">
+      </div>
+      <div class="flex flex-col">
+        <span class="text-sm font-semibold text-slate-800">JJ TECNOLOGÍA E.I.R.L.</span>
+        <span class="text-xs text-slate-500">Panel de administración</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 text-sm">
+      <span class="hidden md:inline text-slate-600">{{ userProfile?.full_name || 'Administrador' }}</span>
+      <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
+        {{ userInitials }}
+      </div>
+      <button
+        class="px-3 py-1 rounded-full border border-slate-200 text-xs text-slate-600 hover:bg-slate-50 transition"
+        (click)="handleSignOut()">
+        Cerrar sesión
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="flex flex-1 ">
+
+    <!-- SIDEBAR -->
+    <aside class="w-60 bg-white  hidden md:flex flex-col border-b border-gray-200">
+      <div class="px-5 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">
+        Menú
+      </div>
+
+      <nav class="flex-1 px-3 space-y-1 text-sm">
+        <a
+          routerLink="/admin"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Dashboard</span>
+        </a>
+
+        <a
+          routerLink="/admin/productos"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Productos</span>
+        </a>
+
+        <a
+          routerLink="/admin/servicios"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Servicios</span>
+        </a>
+
+        <a
+          routerLink="/admin/ordenes"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Órdenes de compra</span>
+        </a>
+
+        <a
+          routerLink="/admin/clientes"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Clientes</span>
+        </a>
+
+        <a
+          routerLink="/admin/reportes"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+          <span>Reportes</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ZONA DE CONTENIDO -->
+    <main class="flex-1 p-5">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

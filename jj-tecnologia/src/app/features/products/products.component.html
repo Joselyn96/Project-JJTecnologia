@@ -7,15 +7,11 @@
       <!-- Sidebar Filters -->
       <div class="lg:col-span-1">
         <app-card>
-          <h3 class="font-serif font-semibold mb-4">Filtros</h3>
 
           <!-- Search -->
           <div class="mb-6">
-            <app-input
-              placeholder="Buscar productos..."
-              [value]="searchTerm()"
-              (input)="onSearchInput($event)"
-            ></app-input>
+            <app-input placeholder="Buscar productos..." [value]="searchTerm()"
+              (input)="onSearchInput($event)"></app-input>
           </div>
 
           <!-- Category -->
@@ -23,61 +19,37 @@
             <h4 class="font-semibold text-sm mb-3">Categoría</h4>
             <div class="space-y-2">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="category"
-                  value="all"
-                  [checked]="selectedCategory() === 'all'"
-                  (change)="onCategoryChange($event)"
-                  class="w-4 h-4"
-                />
+                <input type="radio" name="category" value="all" [checked]="selectedCategory() === 'all'"
+                  (change)="onCategoryChange($event)" class="w-4 h-4" />
                 <span class="text-sm">Todas</span>
               </label>
 
-              @for (cat of categories(); track cat) {
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="category"
-                    [value]="cat"
-                    [checked]="selectedCategory() === cat"
-                    (change)="onCategoryChange($event)"
-                    class="w-4 h-4"
-                  />
-                  <span class="text-sm">{{ cat }}</span>
-                </label>
+              @for (cat of productsService.categories(); track cat.id) {
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="category" [value]="cat.id" [checked]="selectedCategory() === cat.id"
+                  (change)="onCategoryChange($event)" class="w-4 h-4" />
+                <span class="text-sm">{{ cat.name }}</span>
+              </label>
               }
             </div>
           </div>
 
-          <!-- Brand -->
+          <!-- Brand (ahora es categoría también) -->
           <div class="mb-6">
-            <h4 class="font-semibold text-sm mb-3">Marca</h4>
+            <h4 class="font-semibold text-sm mb-3">Filtro adicional</h4>
             <div class="space-y-2">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="brand"
-                  value="all"
-                  [checked]="selectedBrand() === 'all'"
-                  (change)="onBrandChange($event)"
-                  class="w-4 h-4"
-                />
+                <input type="radio" name="brand" value="all" [checked]="selectedBrand() === 'all'"
+                  (change)="onBrandChange($event)" class="w-4 h-4" />
                 <span class="text-sm">Todas</span>
               </label>
 
               @for (brand of brands(); track brand) {
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="brand"
-                    [value]="brand"
-                    [checked]="selectedBrand() === brand"
-                    (change)="onBrandChange($event)"
-                    class="w-4 h-4"
-                  />
-                  <span class="text-sm">{{ brand }}</span>
-                </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="brand" [value]="brand" [checked]="selectedBrand() === brand"
+                  (change)="onBrandChange($event)" class="w-4 h-4" />
+                <span class="text-sm">{{ brand }}</span>
+              </label>
               }
             </div>
           </div>
@@ -86,16 +58,10 @@
           <div>
             <h4 class="font-semibold text-sm mb-3">Rango de Precio</h4>
             <div class="space-y-2">
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                [value]="priceRange()[1]"
-                (input)="onPriceMaxInput($event)"
-                class="w-full"
-              />
+              <input type="range" min="0" [max]="maxPriceValue()" [value]="priceRange()[1]"
+                (input)="onPriceMaxInput($event)" class="w-full" />
               <div class="flex justify-between text-sm text-text-muted">
-                <span>S/ {{ priceRange()[0] }}</span>
+                <span>S/ 0</span>
                 <span>S/ {{ priceRange()[1] }}</span>
               </div>
             </div>
@@ -111,11 +77,8 @@
             Mostrando {{ filteredProducts().length }} productos
           </p>
 
-          <select
-            [value]="sortBy()"
-            (change)="onSortChange($event)"
-            class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-foreground"
-          >
+          <select [value]="sortBy()" (change)="onSortChange($event)"
+            class="px-2 py-2 border border-gray-300 rounded-lg bg-white text-foreground">
             <option value="newest">Más nuevos</option>
             <option value="price-low">Precio: Menor a Mayor</option>
             <option value="price-high">Precio: Mayor a Menor</option>
@@ -124,64 +87,170 @@
         </div>
 
         <!-- Products -->
-        @if (filteredProducts().length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-  @for (product of filteredProducts(); track product.id) {
-    <app-card [hover]="true" class="flex flex-col justify-between h-full min-h-[420px]">
-      <div class="relative mb-4 h-48 bg-surface rounded-lg overflow-hidden flex items-center justify-center">
-        <img
-          [src]="product.image || '/placeholder.svg'"
-          [alt]="product.name"
-          width="200"
-          height="200"
-          class="object-cover"
-        />
-      </div>
-
-      <div class="mb-3 flex-1">
-        <div class="flex justify-between items-start mb-2">
-          <h3 class="font-serif font-semibold text-lg flex-1">
-            {{ product.name }}
-          </h3>
-          <app-badge [variant]="getStockBadgeVariant(product.stock)">
-            {{
-              product.stock === 0
-                ? 'Agotado'
-                : product.stock <= 5
-                ? 'Bajo stock'
-                : 'En stock'
-            }}
-          </app-badge>
+        @if (productsService.isLoading()) {
+        <div class="flex justify-center items-center py-12">
+          <div class="spinner-border"></div>
         </div>
-        <p class="text-sm text-text-muted mb-3">
-          {{ product.category }} • {{ product.brand }}
-        </p>
-      </div>
+        } @else if (filteredProducts().length > 0) {
+        <div class="text-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          @for (product of filteredProducts(); track product.id) {
+          <app-card [hover]="true" class="flex flex-col justify-between h-full min-h-[420px]">
+            <!-- Imagen con botón de vista rápida -->
+            <div
+              class="relative mb-4 h-48 bg-surface rounded-lg overflow-hidden flex items-center justify-center group">
+              <img [src]="product.image_url || '/placeholder.svg'" [alt]="product.name" width="200" height="200"
+                class="object-cover" />
 
-      <div>
-        <p class="text-2xl font-bold text-primary mb-4">
-          {{ product.price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
-        </p>
-        <app-button class="w-full h-[44px]" [disabled]="product.stock === 0">
-          {{ product.stock === 0 ? 'Agotado' : 'Añadir al carrito' }}
-        </app-button>
-      </div>
-    </app-card>
-  }
-</div>
-        } @else {
-          <app-card>
-            <div class="text-center py-12">
-              <p class="text-text-muted mb-4">
-                No se encontraron productos con los filtros seleccionados.
+              <!-- Botón de ojito (aparece al hacer hover) -->
+              <button (click)="openProductDetail(product)"
+                class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition opacity-0 group-hover:opacity-100"
+                title="Ver detalles">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="mb-3 flex-1 min-h-[75px]">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="font-medium text-lg flex-1">
+                  {{ product.name }}
+                </h3>
+              </div>
+              <p class="text-sm text-gray-500 mb-3">
+                {{ getCategoryName(product.category_id) }}
               </p>
-              <app-button variant="secondary" (click)="clearFilters()">
-                Limpiar filtros
+            </div>
+
+            <div>
+              <p class="text-2xl font-medium text-primary mb-4">
+                {{ product.price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+              </p>
+              <app-button class="w-full h-[44px]" [disabled]="product.stock === 0" (click)="addToCart(product, $event)">
+                {{ product.stock === 0 ? 'Agotado' : 'Añadir al carrito' }}
               </app-button>
             </div>
           </app-card>
+          }
+        </div>
+        } @else {
+        <app-card>
+          <div class="text-center py-12">
+            <p class="text-text-muted mb-4">
+              No se encontraron productos con los filtros seleccionados.
+            </p>
+            <app-button variant="secondary" (click)="clearFilters()">
+              Limpiar filtros
+            </app-button>
+          </div>
+        </app-card>
         }
       </div>
     </div>
   </div>
+
+  <!-- MODAL DE DETALLES DEL PRODUCTO -->
+  @if (showModal() && selectedProduct()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+    (click)="closeModal()">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+      (click)="$event.stopPropagation()">
+
+      <!-- Header del Modal -->
+      <div class="bg-primary-400 px-6 py-4 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Detalles del Producto</h2>
+        <button (click)="closeModal()" class="cursor-pointer text-white hover:bg-white/20 rounded-lg p-1 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenido del Modal -->
+      <div class="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Imagen del producto -->
+          <div class="bg-white rounded-lg p-6 flex items-center justify-center">
+            <img [src]="selectedProduct()!.image_url || '/placeholder.svg'" [alt]="selectedProduct()!.name"
+              class="max-w-full max-h-96 object-contain">
+          </div>
+
+          <!-- Información del producto -->
+          <div class="space-y-4">
+            <!-- Nombre -->
+            <div>
+              <h3 class="text-2xl font-medium text-gray-900">{{ selectedProduct()!.name }}</h3>
+              <p class="text-sm text-gray-500 mt-1">{{ getCategoryName(selectedProduct()!.category_id) }}</p>
+              <!-- <p class="text-xs text-gray-400 mt-1">SKU: {{ selectedProduct()!.sku }}</p> -->
+            </div>
+
+            <!-- Precio -->
+            <div class="border-t border-b border-gray-200 py-4">
+              <p class="text-3xl font-medium text-primary-900">
+                {{ selectedProduct()!.price | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+              </p>
+            </div>
+
+            <!-- Stock -->
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-gray-700">Estado:</span>
+              <app-badge [variant]="getStockBadgeVariant(selectedProduct()!.stock)">
+                {{
+                selectedProduct()!.stock === 0
+                ? 'Agotado'
+                : selectedProduct()!.stock <= 5 ? 'Bajo stock (' + selectedProduct()!.stock + ' disponibles)'
+                  : 'En stock (' + selectedProduct()!.stock + ' disponibles)' }} </app-badge>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">Descripción</h4>
+              <p class="text-gray-700 leading-relaxed">
+                {{ selectedProduct()!.description || 'Sin descripción disponible.' }}
+              </p>
+            </div>
+
+            <!-- Características adicionales (placeholder) -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-2">Especificaciones</h4>
+              <ul class="space-y-2 text-sm text-gray-700">
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Garantía de 1 año</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Envío a todo el Perú</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Soporte técnico incluido</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Botón de añadir al carrito -->
+            <div class="pt-4">
+              <app-button class="w-full h-[48px]" [disabled]="selectedProduct()!.stock === 0"
+                (click)="addToCart(selectedProduct()!, $event)">
+                {{ selectedProduct()!.stock === 0 ? 'Producto Agotado' : 'Añadir al Carrito' }}
+              </app-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
 </main>

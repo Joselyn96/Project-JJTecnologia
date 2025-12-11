@@ -1,0 +1,471 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Carrito de Compras</h1>
+            <p class="text-gray-600">
+                {{ cartCount() }} {{ cartCount() === 1 ? 'producto' : 'productos' }} en tu carrito
+            </p>
+        </div>
+
+        @if (cartItems().length === 0) {
+        <!-- Carrito vacío -->
+        <app-card>
+            <div class="text-center py-16">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-100 mb-6">
+                    <span class="material-symbols-outlined text-6xl text-gray-400">
+                        shopping_cart
+                    </span>
+                </div>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+                    Tu carrito está vacío
+                </h2>
+                <p class="text-gray-600 mb-8">
+                    Agrega productos para comenzar tu compra
+                </p>
+                <app-button (click)="continueShopping()">
+                    Ver productos
+                </app-button>
+            </div>
+        </app-card>
+        } @else {
+        <!-- Carrito con productos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Lista de productos (IZQUIERDA - siempre visible) -->
+            <div class="lg:col-span-2 space-y-4">
+                @for (item of cartItems(); track item.product.id) {
+                <app-card>
+                    <div class="flex gap-6">
+
+                        <!-- Imagen del producto -->
+                        <div class="flex-shrink-0">
+                            <img [src]="item.product.image_url || '/placeholder.svg'" [alt]="item.product.name"
+                                class="w-32 h-32 object-cover rounded-lg bg-gray-100" />
+                        </div>
+
+                        <!-- Información del producto -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                                        {{ item.product.name }}
+                                    </h3>
+                                    <p class="text-sm text-gray-500">
+                                        SKU: {{ item.product.sku }}
+                                    </p>
+                                    @if (item.product.stock <= 5 && item.product.stock> 0) {
+                                        <p class="text-sm text-orange-600 mt-1">
+                                            Solo quedan {{ item.product.stock }} unidades
+                                        </p>
+                                        }
+                                </div>
+
+                                <!-- Botón eliminar (solo visible en resumen) -->
+                                @if (checkoutStep() === CheckoutStep.SUMMARY) {
+                                <button (click)="removeItem(item.product.id!)"
+                                    class="cursor-pointer text-gray-400 hover:text-red-600 transition-colors p-1"
+                                    title="Eliminar producto">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                                }
+                            </div>
+
+                            <!-- Precio y controles -->
+                            <div class="flex justify-between items-end mt-4">
+
+                                <!-- Control de cantidad (solo visible en resumen) -->
+                                @if (checkoutStep() === CheckoutStep.SUMMARY) {
+                                <div class="flex items-center gap-2">
+                                    <button (click)="decrementQuantity(item.product.id!)"
+                                        class="cursor-pointer w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-lg">remove</span>
+                                    </button>
+
+                                    <input type="number" [value]="item.quantity"
+                                        (change)="onQuantityChange(item.product.id!, $event)" min="1"
+                                        [max]="item.product.stock"
+                                        class="w-16 h-8 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+
+                                    <button (click)="incrementQuantity(item.product.id!)"
+                                        [disabled]="item.quantity >= item.product.stock"
+                                        class="w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-100 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span class="cursor-pointer material-symbols-outlined text-lg">add</span>
+                                    </button>
+                                </div>
+                                } @else {
+                                <!-- Solo mostrar cantidad en checkout -->
+                                <div class="text-sm text-gray-600">
+                                    Cantidad: {{ item.quantity }}
+                                </div>
+                                }
+
+                                <!-- Precio -->
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-500">Subtotal</p>
+                                    <p class="text-xl font-semibold text-primary-900">
+                                        {{ getItemSubtotal(item) | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </app-card>
+                }
+            </div>
+
+            <!-- Panel derecho - CONTENIDO DINÁMICO -->
+            <div class="lg:col-span-1">
+                <app-card>
+
+                    <!-- =============================================== -->
+                    <!-- PASO 0: Resumen del pedido -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.SUMMARY) {
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                        Resumen del pedido
+                    </h2>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal ({{ cartCount() }} productos)</span>
+                            <span>{{ cartTotal() | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Envío</span>
+                            <span class="text-green-600 font-medium">GRATIS</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3 mt-3">
+                            <div class="flex justify-between text-lg font-semibold text-gray-900">
+                                <span>Total</span>
+                                <span class="text-primary-900">
+                                    {{ cartTotal() | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <app-button class="w-full h-[48px]" (click)="proceedToCheckout()">
+                            Procesar pago
+                        </app-button>
+
+                        <app-button variant="secondary" class="w-full h-[48px]" (click)="continueShopping()">
+                            Continuar comprando
+                        </app-button>
+
+                        <button (click)="clearCart()"
+                            class="cursor-pointer w-full text-sm text-red-600 hover:text-red-700 py-2 transition-colors">
+                            Vaciar carrito
+                        </button>
+                    </div>
+
+                    <!-- Info adicional -->
+                    <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                        <div class="flex items-start gap-2 text-sm text-gray-600">
+                            <span class="material-symbols-outlined text-green-600">verified</span>
+                            <span>Compra 100% segura</span>
+                        </div>
+                        <div class="flex items-start gap-2 text-sm text-gray-600">
+                            <span class="material-symbols-outlined text-green-600">local_shipping</span>
+                            <span>Envío gratis a todo el Perú</span>
+                        </div>
+                        <div class="flex items-start gap-2 text-sm text-gray-600">
+                            <span class="material-symbols-outlined text-green-600">autorenew</span>
+                            <span>Devoluciones fáciles</span>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- =============================================== -->
+                    <!-- PASO 1: Verificación de login -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.LOGIN) {
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 mb-4">
+                            <span class="material-symbols-outlined text-3xl text-primary-600">
+                                login
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                            Inicia sesión para continuar
+                        </h2>
+                        <p class="text-gray-600 mb-6">
+                            Necesitas estar autenticado para procesar tu compra
+                        </p>
+                        <div class="flex flex-col gap-2">
+                            <app-button class="w-full h-[48px]" (click)="openAuthModal()">
+                                Iniciar sesión
+                            </app-button>
+                            <app-button variant="secondary" class="w-full h-[48px]" (click)="goBackToSummary()">
+                                Volver al carrito
+                            </app-button>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- =============================================== -->
+                    <!-- PASO 2: Formulario de dirección -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.SHIPPING) {
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                        Dirección de envío
+                    </h2>
+
+                    <form [formGroup]="shippingForm" (ngSubmit)="submitShippingAddress()" class="space-y-4">
+
+                        <!-- Dirección completa -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Dirección completa *
+                            </label>
+                            <input type="text" formControlName="shipping_address"
+                                placeholder="Ej: Av. Arequipa 1234, Piso 5, Dpto 501"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                [class.border-red-500]="isFieldInvalid('shipping_address')" />
+                            @if (isFieldInvalid('shipping_address')) {
+                            <p class="text-sm text-red-600 mt-1">
+                                {{ getFieldError('shipping_address') }}
+                            </p>
+                            }
+                        </div>
+
+                        <!-- Departamento -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Departamento *
+                            </label>
+    <select formControlName="department"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        [class.border-red-500]="isFieldInvalid('department')">
+        <option value="">Selecciona un departamento</option>
+        @for (dept of departamentos(); track dept.codigo) {
+            <option [value]="dept.codigo">{{ dept.nombre }}</option>
+        }
+    </select>
+    @if (isFieldInvalid('department')) {
+    <p class="text-sm text-red-600 mt-1">
+        {{ getFieldError('department') }}
+    </p>
+    }
+                        </div>
+
+                        <!-- Provincia -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+        Provincia *
+    </label>
+    <select formControlName="province"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        [class.border-red-500]="isFieldInvalid('province')"
+        [disabled]="provincias().length === 0">
+        <option value="">
+            {{ provincias().length === 0 ? 'Primero selecciona un departamento' : 'Selecciona una provincia' }}
+        </option>
+        @for (prov of provincias(); track prov.codigo) {
+            <option [value]="prov.codigo">{{ prov.nombre }}</option>
+        }
+    </select>
+    @if (isFieldInvalid('province')) {
+    <p class="text-sm text-red-600 mt-1">
+        {{ getFieldError('province') }}
+    </p>
+    }
+                        </div>
+
+                        <!-- Distrito -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+        Distrito *
+    </label>
+    <select formControlName="district"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        [class.border-red-500]="isFieldInvalid('district')"
+        [disabled]="distritos().length === 0">
+        <option value="">
+            {{ distritos().length === 0 ? 'Primero selecciona una provincia' : 'Selecciona un distrito' }}
+        </option>
+        @for (dist of distritos(); track dist.codigo) {
+            <option [value]="dist.codigo">{{ dist.nombre }}</option>
+        }
+    </select>
+    @if (isFieldInvalid('district')) {
+    <p class="text-sm text-red-600 mt-1">
+        {{ getFieldError('district') }}
+    </p>
+    }
+                        </div>
+
+                        <!-- Referencia (opcional) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Referencia (opcional)
+                            </label>
+                            <input type="text" formControlName="reference" placeholder="Ej: Frente al parque Kennedy"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex gap-2 pt-4">
+                            <app-button type="button" variant="secondary" class="w-full h-[48px]"
+                                (click)="goBackToSummary()">
+                                Volver
+                            </app-button>
+                            <app-button type="submit" class="w-full h-[48px]">
+                                Continuar
+                            </app-button>
+                        </div>
+                    </form>
+                    }
+
+                    <!-- =============================================== -->
+                    <!-- PASO 3: Confirmación -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.CONFIRMATION && checkoutData()) {
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                        Confirmar pedido
+                    </h2>
+
+                    <!-- Dirección de envío -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-medium text-gray-900">Enviar a:</h3>
+                            <button (click)="goBackToShipping()"
+                                class="cursor-pointer text-sm text-primary-600 hover:text-primary-700">
+                                Editar
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-600">
+                            {{ checkoutData()!.shipping_address }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            {{ checkoutData()!.district }}, {{ checkoutData()!.province }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            {{ checkoutData()!.department }}
+                        </p>
+                        @if (checkoutData()!.reference) {
+                        <p class="text-sm text-gray-500 mt-1">
+                            Ref: {{ checkoutData()!.reference }}
+                        </p>
+                        }
+                    </div>
+
+                    <!-- Resumen de costos -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span>{{ checkoutData()!.subtotal | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Envío</span>
+                            <span class="text-green-600 font-medium">GRATIS</span>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between text-lg font-semibold text-gray-900">
+                                <span>Total a pagar</span>
+                                <span class="text-primary-900">
+                                    {{ checkoutData()!.total | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex flex-col gap-2">
+                        <app-button class="w-full h-[48px]" (click)="confirmOrder()">
+                            Proceder al pago
+                        </app-button>
+                        <app-button variant="secondary" class="w-full h-[48px]" (click)="goBackToShipping()">
+                            Volver
+                        </app-button>
+                    </div>
+                    }
+
+                    <!-- =============================================== -->
+                    <!-- PASO 4: Procesando pago -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.PAYMENT) {
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 mb-4">
+                            <span class="material-symbols-outlined text-3xl text-primary-600 animate-spin">
+                                progress_activity
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                            Procesando pago...
+                        </h2>
+                        <p class="text-gray-600">
+                            Por favor espera
+                        </p>
+                    </div>
+                    }
+                    <!-- =============================================== -->
+                    <!-- PASO 5: Orden exitosa (AGREGAR ESTO) -->
+                    <!-- =============================================== -->
+                    @if (checkoutStep() === CheckoutStep.SUCCESS && createdOrder()) {
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                            <span class="material-symbols-outlined text-3xl text-green-600">
+                                check_circle
+                            </span>
+                        </div>
+
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+                            ¡Orden creada exitosamente!
+                        </h2>
+
+                        <p class="text-gray-600 mb-6">
+                            Tu pedido ha sido registrado correctamente
+                        </p>
+
+                        <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-gray-600">Número de orden:</span>
+                                <span class="text-sm font-semibold text-gray-900">#{{ createdOrder()!.id }}</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-gray-600">Total pagado:</span>
+                                <span class="text-sm font-semibold text-primary-900">
+                                    {{ createdOrder()!.total | currency:'PEN':'symbol-narrow':'1.0-0':'es-PE' }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-600">Estado:</span>
+                                <span class="text-sm px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
+                                    Pendiente de envío
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-sm text-gray-600 mb-6 space-y-2">
+                            <p>✅ Hemos enviado un email de confirmación</p>
+                            <p>📦 Tu pedido será procesado pronto</p>
+                            <p>🚚 Te notificaremos cuando sea enviado</p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <app-button class="w-full h-[48px]" (click)="viewOrder()">
+                                Ver mi orden
+                            </app-button>
+                            <app-button variant="secondary" class="w-full h-[48px]" (click)="goToHome()">
+                                Volver al inicio
+                            </app-button>
+                        </div>
+                    </div>
+                    }
+                </app-card>
+            </div>
+        </div>
+        }
+    </div>
+</main>
+
+<!-- Modal de autenticación -->
+@if (showAuthModal()) {
+<app-auth-modal (close)="closeAuthModal()" />
+}
+<app-payment-modal></app-payment-modal>

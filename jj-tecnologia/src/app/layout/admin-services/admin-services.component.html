@@ -1,0 +1,214 @@
+<div class="space-y-4">
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Servicios</h1>
+      <p class="text-sm text-slate-500 mt-1">Gestiona tu catálogo de servicios</p>
+    </div>
+    <button
+      (click)="openCreateModal()"
+      class="cursor-pointer px-4 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-900 transition shadow-md">
+      + Nuevo Servicio
+    </button>
+  </div>
+
+  <!-- BUSCADOR Y STATS -->
+  <div class="bg-white rounded-lg border border-gray-200 p-4">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex-1">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar servicios por nombre..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div class="flex gap-4 text-sm">
+        <div class="text-center">
+          <p class="text-slate-500">Total</p>
+          <p class="text-lg font-bold text-slate-800">{{ servicesService.services().length }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-slate-500">Activos</p>
+          <p class="text-lg font-bold text-green-600">
+            {{ activeServicesCount }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE SERVICIOS -->
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    @if (servicesService.isLoading()) {
+      <div class="p-8 text-center">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p class="text-sm text-slate-500 mt-2">Cargando servicios...</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Servicio</th>
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Descripción</th>
+              <th class="px-4 py-3 text-left font-semibold text-slate-700">Precio Base</th>
+              <th class="px-4 py-3 text-center font-semibold text-slate-700">Estado</th>
+              <th class="px-4 py-3 text-center font-semibold text-slate-700">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+          @if (servicesService.services().length === 0) {
+            <tr>
+              <td colspan="5" class="px-4 py-8 text-center text-slate-500">
+                No hay servicios registrados. Crea uno nuevo para comenzar.
+              </td>
+            </tr>
+          } @else if (filteredServices.length === 0) {
+            <tr>
+              <td colspan="5" class="px-4 py-8 text-center text-slate-500">
+                No se encontraron servicios
+              </td>
+            </tr>
+          } @else {
+            @for (service of filteredServices; track service.id) {
+              <tr class="hover:bg-slate-50 transition">
+                <td class="px-4 py-3">
+                  <div class="font-medium text-slate-800">{{ service.name }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="text-slate-600 max-w-md truncate">
+                    {{ service.description }}
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="font-semibold text-slate-800">{{ formatPrice(service.base_price) }}</span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <button
+                    (click)="toggleStatus(service)"
+                    [class]="service.active 
+                      ? 'px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 hover:bg-green-200 transition' 
+                      : 'px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition'">
+                    {{ service.active ? 'Activo' : 'Inactivo' }}
+                  </button>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center justify-center gap-2">
+                    <button
+                      (click)="openEditModal(service)"
+                      class="cursor-pointer py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-medium transition">
+                      Editar
+                    </button>
+                    <button
+                      (click)="handleDelete(service.id!)"
+                      class="cursor-pointer px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium transition">
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- MODAL -->
+  @if (showModal()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeModal()">
+      <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden" (click)="$event.stopPropagation()">
+        
+        <!-- Header del Modal -->
+        <div class="bg-primary-400 px-6 py-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold text-white">
+            {{ isEditing() ? 'Editar Servicio' : 'Nuevo Servicio' }}
+          </h2>
+          <button
+            (click)="closeModal()"
+            class="cursor-pointer text-white hover:bg-white/20 rounded-lg p-1 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Formulario -->
+        <form (ngSubmit)="handleSubmit()" class="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-140px)]">
+          
+          <!-- Nombre del Servicio -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Nombre del Servicio *</label>
+            <input
+              type="text"
+              [ngModel]="currentService().name"
+              (ngModelChange)="updateName($event)"
+              name="name"
+              required
+              placeholder="Ej: Instalación de Cámaras de Seguridad"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <!-- Descripción -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Descripción *</label>
+            <textarea
+              [ngModel]="currentService().description"
+              (ngModelChange)="updateDescription($event)"
+              name="description"
+              required
+              rows="4"
+              placeholder="Describe el servicio en detalle..."
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+
+          <!-- Precio Base -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Precio Base (S/) *</label>
+            <input
+              type="number"
+              [ngModel]="currentService().base_price"
+              (ngModelChange)="updateBasePrice($event)"
+              name="base_price"
+              required
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p class="text-xs text-slate-500 mt-1">Este es el precio base, puede variar según las necesidades del cliente</p>
+          </div>
+
+          <!-- Estado Activo -->
+          <div class="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-lg">
+            <input
+              type="checkbox"
+              [ngModel]="currentService().active"
+              (ngModelChange)="updateActive($event)"
+              name="active"
+              id="active"
+              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+            <label for="active" class="text-sm font-medium text-slate-700 cursor-pointer">
+              Servicio activo (visible para los clientes)
+            </label>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="cursor-pointer px-5 py-2.5 border border-gray-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="cursor-pointer px-5 py-2.5 bg-primary-400 text-white rounded-lg text-sm font-medium hover:bg-primary-900 transition shadow-md">
+              {{ isEditing() ? '✓ Actualizar' : '+ Crear' }} Servicio
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

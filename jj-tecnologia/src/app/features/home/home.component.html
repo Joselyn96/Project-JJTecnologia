@@ -5,11 +5,11 @@
   <section class="bg-gradient-to-br from-primary-50 via-white to-surface py-20">
     <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div>
-        <h1 class="text-5xl md:text-6xl font-serif font-medium text-primary mb-6">
+        <h1 class="text-5xl md:text-6xl font-medium text-primary mb-6">
           Soluciones tecnológicas con garantía y soporte experto
         </h1>
         <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-          Computadoras, impresoras, cámaras de seguridad y servicios técnicos para tu hogar o negocio.
+          Computadoras, impresoras, cámaras de seguridad y servicios técnicos para tu hogar o negocio
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
           <app-button size="lg">
@@ -23,10 +23,20 @@
       </div>
 
       <div class="relative h-96 bg-surface rounded-2xl overflow-hidden flex items-center justify-center">
-        <div class="text-center">
-          <img src="assets/laptop-hero.jpg" alt="Productos destacados" class="mx-auto w-72" loading="lazy" />
-          <p class="text-gray-500 mt-4">Carrusel de productos</p>
-        </div>
+        <img
+  [src]="carouselImages[currentImageIndex]"
+  alt="Productos destacados"
+  class=" w-full h-full object-contain scale-110 md:scale-125 transition-all duration-700"
+  loading="lazy"
+/>
+  <!-- Indicadores de paginación -->
+  <div class="absolute bottom-4 flex gap-2">
+    <span 
+      *ngFor="let img of carouselImages; let i = index"
+      class="w-3 h-3 rounded-full transition-all"
+      [ngClass]="i === currentImageIndex ? 'bg-primary' : 'bg-gray-300'"
+    ></span>
+  </div>
       </div>
     </div>
   </section>
@@ -38,11 +48,11 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         @for (s of services; track s.title) {
         <app-card class="h-full" [hover]="true">
-          <div class="h-full flex flex-col items-center text-center">
+          <div class="h-[180px] flex flex-col items-center text-center">
             <div class="bg-primary-50 p-4 rounded-xl mb-4">
               <span class="material-symbols-outlined text-primary text-4xl">{{ s.icon }}</span>
             </div>
-            <h3 class="text-lg font-semibold mb-2">{{ s.title }}</h3>
+            <h3 class="text-lg mb-2 font-bold">{{ s.title }}</h3>
             <p class="text-gray-600 text-sm flex-1">{{ s.description }}</p>
           </div>
         </app-card>
@@ -52,21 +62,37 @@
   </section>
 
   <!-- MARCAS -->
-  <section class="py-20 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
-      <h3 class="text-center text-gray-400 text-sm font-semibold mb-8 uppercase tracking-wide">
-        Marcas que confiamos
-      </h3>
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 items-center">
-        @for (brand of brands; track brand) {
-        <div class="flex items-center justify-center p-4 bg-white rounded-lg border">
-          <span class="text-gray-700 font-medium text-sm">{{ brand }}</span>
+  <section class="py-16 bg-gray-50">
+  <div class=" mx-auto px-6">
+    <h3 class="text-center font-bold text-sm mb-8 uppercase tracking-wide">
+      Marcas que confiamos
+    </h3>
+
+    <!-- MOBILE: GRID (sin animación) -->
+    <div class="grid grid-cols-2 gap-4 items-center md:hidden">
+      @for (brand of brands; track brand) {
+      <div class="flex items-center justify-center p-3 bg-white rounded-lg border">
+        <span class="text-gray-700 font-bold text-sm">{{ brand }}</span>
+      </div>
+      }
+    </div>
+
+    <!-- DESKTOP/TABLET: CARRUSEL HORIZONTAL -->
+    <div class="hidden md:block">
+      <!-- wrapper que controla el corte, pegado a los bordes -->
+      <div class="overflow-x-hidden">
+        <div class="flex items-center gap-6 whitespace-nowrap marquee px-6 py-2">
+          @for (brand of brandsDouble; track brand) {
+          <div class="flex items-center justify-center min-w-[120px] p-3 bg-white rounded-lg border">
+            <span class="text-gray-700 font-bold text-sm">{{ brand }}</span>
+          </div>
+          }
         </div>
-        }
       </div>
     </div>
-  </section>
 
+  </div>
+</section>
   <!-- PRODUCTOS -->
   <section class="py-20 bg-white">
     <div class="max-w-6xl mx-auto px-6">
@@ -87,11 +113,11 @@
           </div>
 
           <div class="flex justify-between items-start mb-3">
-            <h3 class="font-serif font-semibold text-lg flex-1">{{ p.name }}</h3>
+            <h3 class="text-lg flex-1">{{ p.name }}</h3>
             <app-badge [variant]="variantFor(p.stock)">{{ p.badge }}</app-badge>
           </div>
 
-          <p class="text-2xl font-bold text-primary mb-4">
+          <p class="text-2xl font-medium text-primary mb-4">
             S/ {{ p.price | number : '1.0-0' : 'es-PE' }}
           </p>
 
@@ -105,7 +131,7 @@
   <!-- TESTIMONIOS -->
   <section class="py-20 bg-white">
     <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-4xl font-serif font-bold text-center mb-12">Lo que dicen nuestros clientes</h2>
+      <h2 class="text-4xl font-bold text-center mb-12">Lo que dicen nuestros clientes</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         @for (t of testimonials; track t.name) {
         <app-card>
@@ -116,7 +142,7 @@
           </div>
           <p class="text-gray-600 mb-4 italic">"{{ t.text }}"</p>
           <div>
-            <p class="font-semibold text-gray-900">{{ t.name }}</p>
+            <p class="text-gray-900">{{ t.name }}</p>
             <p class="text-sm text-gray-500">{{ t.company }}</p>
           </div>
         </app-card>

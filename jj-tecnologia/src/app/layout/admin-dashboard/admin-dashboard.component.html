@@ -1,0 +1,106 @@
+<div class="space-y-6">
+
+    <!-- CABECERA -->
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl text-slate-500">
+                Resumen de ventas, servicios y actividad reciente
+            </h1>
+        </div>
+    </div>
+
+    <!-- CARDS KPI -->
+    <div class="grid gap-4 md:grid-cols-4">
+        <article class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+            <p class="text-[11px] text-slate-500 uppercase tracking-wide">Ventas del mes</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">
+                S/ {{ stats.salesMonth | number:'1.2-2' }}
+            </p>
+        </article>
+
+        <article class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+            <p class="text-[11px] text-slate-500 uppercase tracking-wide">Órdenes de hoy</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">
+                {{ stats.ordersToday }}
+            </p>
+            <p class="mt-1 text-[11px] text-slate-500">Tienda online</p>
+        </article>
+
+        <article class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+            <p class="text-[11px] text-slate-500 uppercase tracking-wide">Servicios pendientes</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">
+                {{ stats.pendingServices }}
+            </p>
+            <p class="mt-1 text-[11px] text-slate-500">Instalación / mantenimiento</p>
+        </article>
+
+        <article class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+            <p class="text-[11px] text-slate-500 uppercase tracking-wide">Productos con bajo stock</p>
+            <p class="mt-2 text-2xl font-semibold text-slate-900">
+                {{ stats.lowStockProducts }}
+            </p>
+            <p class="mt-1 text-[11px] text-slate-500">Requieren reposición</p>
+        </article>
+    </div>
+
+    <!-- SECCIÓN DE GRÁFICOS -->
+    <div class="grid gap-5 md:grid-cols-2">
+
+        <!-- Ventas últimos 30 días + filtros Día / Semana / Mes -->
+        <section class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+
+            <!-- GRÁFICO DE LÍNEA -->
+            <app-sales-line-chart></app-sales-line-chart>
+        </section>
+
+        <!-- Top productos más vendidos -->
+        <section class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+            <app-top-products-chart-component></app-top-products-chart-component>
+        </section>
+    </div>
+
+    <!-- TABLA DE ÓRDENES RECIENTES -->
+    <section class="bg-white rounded-xl shadow-sm p-4 border border-slate-100">
+        <h2 class="text-sm font-semibold text-slate-800 mb-3">
+            Órdenes recientes
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50">
+                        <th class="text-left px-3 py-2 text-xs font-medium text-slate-500">N° Orden</th>
+                        <th class="text-left px-3 py-2 text-xs font-medium text-slate-500">Cliente</th>
+                        <th class="text-left px-3 py-2 text-xs font-medium text-slate-500">Fecha</th>
+                        <th class="text-left px-3 py-2 text-xs font-medium text-slate-500">Total</th>
+                        <th class="text-left px-3 py-2 text-xs font-medium text-slate-500">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let order of recentOrders" class="border-b border-slate-100">
+                        <td class="px-3 py-2 text-slate-700">{{ order.orderNumber }}</td>
+                        <td class="px-3 py-2 text-slate-700">{{ order.customer }}</td>
+                        <td class="px-3 py-2 text-slate-700">{{ order.date }}</td>
+                        <td class="px-3 py-2 text-slate-700">
+                            S/ {{ order.total | number:'1.2-2' }}
+                        </td>
+                        <td class="px-3 py-2">
+                            <span
+    class="inline-flex px-2 py-0.5 rounded-full text-[11px]"
+    [ngClass]="{
+      'bg-emerald-100 text-emerald-700': order.paymentStatus === 'Pagado',
+      'bg-amber-100 text-amber-700': order.paymentStatus === 'Pendiente',
+      'bg-red-100 text-red-700': order.paymentStatus === 'Fallido',
+      'bg-slate-100 text-slate-700': !['Pagado','Pendiente','Fallido'].includes(order.paymentStatus)
+    }"
+  >
+    {{ order.paymentStatus }}
+  </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>

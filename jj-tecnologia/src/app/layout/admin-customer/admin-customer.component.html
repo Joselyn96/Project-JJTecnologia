@@ -1,0 +1,74 @@
+<div class="space-y-4">
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Clientes</h1>
+      <p class="text-sm text-slate-500 mt-1">Gestiona los clientes que han realizado compras</p>
+    </div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="bg-white rounded-lg border border-gray-200 p-4">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="filterCustomers()"
+      placeholder="Buscar por nombre..."
+      class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+  </div>
+
+  <!-- TABLA DE CLIENTES -->
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-gray-200">
+          <tr>
+            <th class="px-4 py-3 text-left font-semibold text-slate-700">Cliente</th>
+            <th class="px-4 py-3 text-center font-semibold text-slate-700">Total Órdenes</th>
+            <th class="px-4 py-3 text-right font-semibold text-slate-700">Total Gastado</th>
+            <th class="px-4 py-3 text-center font-semibold text-slate-700">Última Compra</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @if (isLoading()) {
+            <tr>
+              <td colspan="4" class="px-4 py-8 text-center text-slate-500">
+                Cargando clientes...
+              </td>
+            </tr>
+          } @else if (filteredCustomers().length === 0) {
+            <tr>
+              <td colspan="4" class="px-4 py-8 text-center text-slate-500">
+                No se encontraron clientes
+              </td>
+            </tr>
+          } @else {
+            @for (customer of filteredCustomers(); track customer.user_id) {
+              <tr class="hover:bg-slate-50 transition">
+                <td class="px-4 py-3">
+                  <div>
+                    <p class="text-slate-800 font-medium">{{ customer.full_name }}</p>
+                    @if (customer.email) {
+                      <p class="text-xs text-slate-500">{{ customer.email }}</p>
+                    }
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex items-center justify-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    {{ customer.total_orders }} {{ customer.total_orders === 1 ? 'orden' : 'órdenes' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right text-slate-800 font-semibold">
+                  S/ {{ customer.total_spent.toFixed(2) }}
+                </td>
+                <td class="px-4 py-3 text-center text-slate-600 text-xs">
+                  {{ formatDate(customer.last_order_date) }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Montserrat:wght@600;700&family=Roboto+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
+
+
+df-messenger {
+  /* Altura y ancho del chat */
+  --df-messenger-chat-window-height: 300px;  /* aquí lo haces más bajito */
+  --df-messenger-chat-window-width: 200px;
+}
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee {
+  animation: marquee 20s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused; /* opcional */
+}
+@theme {
+  --color-primary-100: #cedfef;
+  --color-primary-200: #accae4;
+  --color-primary-300: #85afd5;
+  --color-primary-400: #6794ca;
+  --color-primary-500: #547cbc;
+  --color-primary-900: #252f46;
+
+  --font-family-base: 'Poppins', sans-serif;
+  --font-family-heading: 'Montserrat', sans-serif;
+  --font-family-numbers: 'Roboto Mono', monospace;
+}
