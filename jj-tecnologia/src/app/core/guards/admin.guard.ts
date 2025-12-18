@@ -13,11 +13,21 @@ export const adminGuard: CanActivateFn = async (route, state) => {
 
   const userRole = authService.userProfile()?.role_id;
 
-  if (authService.isAuthenticated() && userRole === 1) {
-    return true;
+  // Si la ruta es /admin/* y ES admin → permitir
+  if (state.url.startsWith('/admin')) {
+    if (userRole === 1) {
+      return true;
+    }
+    router.navigate(['/']);
+    return false;
   }
 
-  // Si no es admin, redirigir a home
-  router.navigate(['/']);
-  return false;
+  // Si la ruta NO es /admin y ES admin → bloquear y redirigir a /admin
+  if (userRole === 1) {
+    router.navigate(['/admin']);
+    return false;
+  }
+
+  // Usuario normal puede acceder
+  return true;
 };

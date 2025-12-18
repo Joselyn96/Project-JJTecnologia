@@ -31,12 +31,25 @@
 
         <!-- Email -->
         <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                Correo electrónico
-            </label>
-            <input id="email" type="email" [(ngModel)]="email" name="email" required placeholder="tu@email.com"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all outline-none">
-        </div>
+  <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+    Correo electrónico
+  </label>
+  <input 
+    id="email" 
+    type="email" 
+    [value]="email()"
+    (input)="onEmailChange($any($event.target).value)"
+    name="email" 
+    required 
+    placeholder="tu@email.com"
+    [class.border-red-500]="emailError()"
+    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all outline-none">
+  
+  <!-- Mensaje de error -->
+  @if (emailError()) {
+    <p class="text-sm text-red-600 mt-1">{{ emailError() }}</p>
+  }
+</div>
 
         <!-- Password -->
         <div class="mb-3">

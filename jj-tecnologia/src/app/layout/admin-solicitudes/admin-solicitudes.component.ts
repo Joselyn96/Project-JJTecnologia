@@ -163,7 +163,7 @@ export class AdminSolicitudesComponent implements OnInit {
     if (result.success) {
       await this.loadAllRequests();
       this.closeModal();
-      alert('✅ Solicitud actualizada correctamente');
+      // alert('Solicitud actualizada correctamente');
     } else {
       alert('❌ Error al actualizar: ' + result.error);
     }

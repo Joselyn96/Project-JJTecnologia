@@ -133,4 +133,10 @@ export class CartService {
       this.cartItems.set([]);
     }
   }
+
+  public clearCartOnLogout() {
+  this.cartItems.set([]);
+  localStorage.removeItem('cart');
+  console.log('🛒 Carrito limpiado por cierre de sesión');
+}
 }

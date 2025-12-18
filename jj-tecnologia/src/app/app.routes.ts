@@ -18,11 +18,11 @@ import { AdminReportesComponent } from './layout/admin-reportes/admin-reportes.c
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
-  { path: 'products', component: ProductsComponent },
-  { path: 'services', component: ServicesComponent },
-  { path: 'customer-cart', component: CustomerCartComponent },
-  { path: 'my-orders', component: MyOrdersComponent },
-  { path: 'my-services', component: MyServicesComponent },
+  { path: 'products', component: ProductsComponent, canActivate: [adminGuard] },
+  { path: 'services', component: ServicesComponent, canActivate: [adminGuard] },
+  { path: 'customer-cart', component: CustomerCartComponent, canActivate: [adminGuard] },
+  { path: 'my-orders', component: MyOrdersComponent, canActivate: [adminGuard] },
+  { path: 'my-services', component: MyServicesComponent,  canActivate: [adminGuard] },
   { path: 'auth/callback', component: AuthCallbackComponent },
   {
     path: 'admin', 

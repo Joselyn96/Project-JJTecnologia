@@ -469,3 +469,44 @@
 <app-auth-modal (close)="closeAuthModal()" />
 }
 <app-payment-modal></app-payment-modal>
+
+<!-- Modal de confirmación de eliminación -->
+@if (showDeleteModal()) {  
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fade-in">
+    
+    <!-- Icono -->
+    <div class="flex justify-center mb-4">
+      <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl text-red-600">
+          delete
+        </span>
+      </div>
+    </div>
+
+    <!-- Título -->
+    <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">
+      ¿Eliminar producto?
+    </h3>
+
+    <!-- Descripción -->
+    <p class="text-gray-600 text-center mb-6">
+      Esta acción eliminará el producto de tu carrito. ¿Estás seguro de continuar?
+    </p>
+
+    <!-- Botones -->
+    <div class="flex gap-3">
+      <button
+        (click)="closeDeleteModal()"
+        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button
+        (click)="confirmDelete()"
+        class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors cursor-pointer">
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+}

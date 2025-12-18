@@ -123,7 +123,7 @@ private supabase: SupabaseClient;
    */
   private async getPendingServices(): Promise<number> {
     // TODO: Descomentar cuando service_requests tenga datos
-    /*
+   
     try {
       const { count, error } = await this.supabase
         .from('service_requests')
@@ -138,7 +138,7 @@ private supabase: SupabaseClient;
       console.error('❌ Error obteniendo servicios pendientes:', error);
       return 0;
     }
-    */
+    
 
     // Retorno temporal mientras no haya datos
     return 0;

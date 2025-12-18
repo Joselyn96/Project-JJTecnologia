@@ -80,6 +80,10 @@ export class CustomerCartComponent {
   cartTotal = computed(() => this.cartService.cartTotal());
   cartCount = computed(() => this.cartService.cartCount());
 
+  // Agregar después de las otras propiedades
+showDeleteModal = signal<boolean>(false);
+productToDelete = signal<number | null>(null);
+
   // UBIGEO DATA
   // ========================================
   departamentos = signal(getDepartamentos());
@@ -219,10 +223,23 @@ export class CustomerCartComponent {
 
   // Eliminar item
   removeItem(productId: number) {
-    if (confirm('¿Estás seguro de eliminar este producto del carrito?')) {
-      this.cartService.removeFromCart(productId);
-    }
+    this.productToDelete.set(productId);
+    this.showDeleteModal.set(true);
   }
+
+  // Agregar estos nuevos métodos
+confirmDelete() {
+  const productId = this.productToDelete();
+  if (productId !== null) {
+    this.cartService.removeFromCart(productId);
+  }
+  this.closeDeleteModal();
+}
+
+closeDeleteModal() {
+  this.showDeleteModal.set(false);
+  this.productToDelete.set(null);
+}
 
   // Vaciar carrito
   clearCart() {

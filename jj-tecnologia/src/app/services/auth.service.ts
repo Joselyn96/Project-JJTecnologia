@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment.development';
+import { CartService } from './cart.service';
 
 export interface UserProfile {
   id: string;
@@ -23,7 +24,7 @@ export class AuthService {
   currentUser = signal<User | null>(null);
   userProfile = signal<UserProfile | null>(null);
 
-  constructor() {
+  constructor( private cartService: CartService) {
     this.supabase = createClient(
     environment.supabaseUrl,
     environment.supabaseKey,
@@ -196,5 +197,7 @@ async signInWithGoogle() {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.userProfile.set(null);
+    // 🛒 Limpiar carrito al cerrar sesión
+  this.cartService.clearCartOnLogout();
   }
 }

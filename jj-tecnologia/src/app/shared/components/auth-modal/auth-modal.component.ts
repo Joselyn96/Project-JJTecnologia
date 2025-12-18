@@ -23,8 +23,9 @@ export class AuthModalComponent {
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
-passwordVisible = false;
-confirmPasswordVisible = false;
+  passwordVisible = false;
+  confirmPasswordVisible = false;
+  emailError = signal('');
   close = output<void>();
 
   constructor(private authService: AuthService, private router: Router) { }
@@ -43,7 +44,7 @@ confirmPasswordVisible = false;
     this.close.emit();
   }
 
- async handleSubmit() {
+  async handleSubmit() {
     this.errorMessage.set('');
     this.successMessage.set('');
     this.isLoading.set(true);
@@ -52,9 +53,9 @@ confirmPasswordVisible = false;
       if (this.isLogin()) {
         // LOGIN
         await this.authService.signIn(this.email(), this.password());
-        
+
         const userRole = this.authService.userProfile()?.role_id;
-        
+
         if (userRole === 1) {
           // Administrador
           this.successMessage.set('¡Bienvenido Administrador!');
@@ -69,7 +70,7 @@ confirmPasswordVisible = false;
             this.close.emit();
           }, 1000);
         }
-        
+
       } else {
         // REGISTER
         if (!this.fullName().trim()) {
@@ -105,42 +106,57 @@ confirmPasswordVisible = false;
       this.isLoading.set(false);
     }
   }
+  validateEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  // Método que se ejecuta cuando el usuario escribe
+  onEmailChange(value: string) {
+    this.email.set(value);
+
+    if (value && !this.validateEmail(value)) {
+      this.emailError.set('Por favor ingresa un correo electrónico válido');
+    } else {
+      this.emailError.set('');
+    }
+  }
   // ========================================
   // NUEVO: LOGIN CON GOOGLE
   // ========================================
   async loginWithGoogle() {
     this.errorMessage.set('');
-  this.isLoading.set(true);
+    this.isLoading.set(true);
 
-  try {
-    const { data, error } = await this.authService.client.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+    try {
+      const { data, error } = await this.authService.client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) {
+        this.errorMessage.set('Error al iniciar sesión con Google');
+        console.error('Error Google OAuth:', error);
+        this.isLoading.set(false);
+        return;
       }
-    });
 
-    if (error) {
-      this.errorMessage.set('Error al iniciar sesión con Google');
-      console.error('Error Google OAuth:', error);
+      // El usuario será redirigido a Google automáticamente
+    } catch (error: any) {
+      this.errorMessage.set('Error inesperado al conectar con Google');
+      console.error('Error inesperado:', error);
       this.isLoading.set(false);
-      return;
     }
-
-    // El usuario será redirigido a Google automáticamente
-  } catch (error: any) {
-    this.errorMessage.set('Error inesperado al conectar con Google');
-    console.error('Error inesperado:', error);
-    this.isLoading.set(false);
-  }
   }
   async signInWithGoogle() {
-  try {
-    await this.authService.signInWithGoogle();
-    // El usuario será redirigido a Google y luego a /auth/callback
-  } catch (error) {
-    console.error('Error al iniciar sesión con Google:', error);
-    alert('Error al iniciar sesión con Google');
+    try {
+      await this.authService.signInWithGoogle();
+      // El usuario será redirigido a Google y luego a /auth/callback
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error);
+      alert('Error al iniciar sesión con Google');
+    }
   }
-}
 }
