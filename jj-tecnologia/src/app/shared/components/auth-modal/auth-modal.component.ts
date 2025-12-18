@@ -134,4 +134,13 @@ confirmPasswordVisible = false;
     this.isLoading.set(false);
   }
   }
+  async signInWithGoogle() {
+  try {
+    await this.authService.signInWithGoogle();
+    // El usuario será redirigido a Google y luego a /auth/callback
+  } catch (error) {
+    console.error('Error al iniciar sesión con Google:', error);
+    alert('Error al iniciar sesión con Google');
+  }
+}
 }

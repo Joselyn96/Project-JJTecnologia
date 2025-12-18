@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+//
+import { ToastNotificationComponent } from '../../shared/components/toast-notification/toast-notification.component';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, RouterModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, RouterModule, ToastNotificationComponent],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css'
 })

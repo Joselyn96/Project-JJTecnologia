@@ -6,7 +6,7 @@ import { DashboardService } from '../../../services/dashboard.service';
 
 @Component({
   selector: 'app-top-products-chart-component',
-  imports: [NgIf, CommonModule],
+  imports: [CommonModule],
   templateUrl: './top-products-chart-component.component.html',
   styleUrl: './top-products-chart-component.component.css'
 })

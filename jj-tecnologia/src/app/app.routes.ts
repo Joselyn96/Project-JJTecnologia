@@ -12,6 +12,9 @@ import { AuthCallbackComponent } from './features/auth-callback/auth-callback.co
 import { MyOrdersComponent } from './features/my-orders/my-orders.component';
 import { AdminOrderComponent } from './layout/admin-order/admin-order.component';
 import { AdminCustomerComponent } from './layout/admin-customer/admin-customer.component';
+import { MyServicesComponent } from './features/my-services/my-services.component';
+import { AdminSolicitudesComponent } from './layout/admin-solicitudes/admin-solicitudes.component';
+import { AdminReportesComponent } from './layout/admin-reportes/admin-reportes.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -19,6 +22,7 @@ export const routes: Routes = [
   { path: 'services', component: ServicesComponent },
   { path: 'customer-cart', component: CustomerCartComponent },
   { path: 'my-orders', component: MyOrdersComponent },
+  { path: 'my-services', component: MyServicesComponent },
   { path: 'auth/callback', component: AuthCallbackComponent },
   {
     path: 'admin', 
@@ -28,7 +32,9 @@ export const routes: Routes = [
       { path: '', component: AdminDashboardComponent },
       { path: 'productos', component: AdminProductsComponent },
       { path: 'servicios', component: AdminServicesComponent },
+      { path: 'solicitudes', component: AdminSolicitudesComponent },
+      { path: 'reportes', component: AdminReportesComponent },
       { path: 'ordenes', component: AdminOrderComponent },
-      { path: 'clientes', component: AdminCustomerComponent }
+      { path: 'clientes', component: AdminCustomerComponent },
     ] },
 ];

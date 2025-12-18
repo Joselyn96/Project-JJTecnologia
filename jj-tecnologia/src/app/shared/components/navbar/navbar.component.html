@@ -44,53 +44,54 @@
         @if (authService.isAuthenticated()) {
         <!-- Usuario logueado -->
         <div class="relative">
-  <!-- Botón del usuario -->
-  <button 
-    (click)="toggleUserMenu()"
-    class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
-    [ngClass]="isScrolled() ? 'text-white' : 'text-gray-700 hover:bg-gray-100'">
-    <span class="material-symbols-outlined">account_circle</span>
-    <span class="text-sm">
-      {{ authService.userProfile()?.full_name || authService.currentUser()?.email }}
-    </span>
-    <span class="material-symbols-outlined text-sm">
-      {{ isUserMenuOpen() ? 'expand_less' : 'expand_more' }}
-    </span>
-  </button>
+          <!-- Botón del usuario -->
+          <button (click)="toggleUserMenu()"
+            class="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
+            [ngClass]="isScrolled() ? 'text-white' : 'text-gray-700 hover:bg-gray-100'">
+            <span class="material-symbols-outlined">account_circle</span>
+            <span class="text-sm">
+              {{ authService.userProfile()?.full_name || authService.currentUser()?.email }}
+            </span>
+            <span class="material-symbols-outlined text-sm">
+              {{ isUserMenuOpen() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
 
-  <!-- Menú desplegable -->
-  @if (isUserMenuOpen()) {
-    <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-      <!-- Opción: Mis Pedidos -->
-      <a 
-        routerLink="/my-orders"
-        (click)="closeUserMenu()"
-        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700">
-        <span class="material-symbols-outlined text-primary-500">receipt_long</span>
-        <span class="font-medium">Mis Pedidos</span>
-      </a>
+          <!-- Menú desplegable -->
+          @if (isUserMenuOpen()) {
+          <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+            <!-- Opción: Mis Pedidos -->
+            <a routerLink="/my-orders" (click)="closeUserMenu()"
+              class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700">
+              <span class="material-symbols-outlined text-primary-500">receipt_long</span>
+              <span class="font-medium">Mis Pedidos</span>
+            </a>
+            <!-- Opción: Mis Servicios -->
+            <a routerLink="/my-services" (click)="closeUserMenu()"
+              class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700">
+              <span class="material-symbols-outlined text-primary-500">construction</span>
+              <span class="font-medium">Mis Servicios</span>
+            </a>
+            <!-- Divisor -->
+            <div class="border-t border-gray-200 my-2"></div>
 
-      <!-- Divisor -->
-      <div class="border-t border-gray-200 my-2"></div>
-
-      <!-- Opción: Cerrar Sesión -->
-      <button 
-        (click)="logout()"
-        class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700 w-full text-left">
-        <span class="material-symbols-outlined text-red-500">logout</span>
-        <span class="font-medium">Cerrar Sesión</span>
-      </button>
-    </div>
-  }
-</div>
+            <!-- Opción: Cerrar Sesión -->
+            <button (click)="logout()"
+              class="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700 w-full text-left">
+              <span class="material-symbols-outlined text-red-500">logout</span>
+              <span class="font-medium">Cerrar Sesión</span>
+            </button>
+          </div>
+          }
+        </div>
         } @else {
         <!-- Botón de login -->
         <button (click)="openAuthModal()"
-            [class]="isScrolled() ? ' hover:bg-primary-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'"
-            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg transition-colors text-sm font-medium cursor-pointer">
-            <span class="material-symbols-outlined text-base">account_circle</span>
-            <span>Iniciar Sesión</span>
-          </button>
+          [class]="isScrolled() ? ' hover:bg-primary-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'"
+          class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg transition-colors text-sm font-medium cursor-pointer">
+          <span class="material-symbols-outlined text-base">account_circle</span>
+          <span>Iniciar Sesión</span>
+        </button>
         }
       </div>
 

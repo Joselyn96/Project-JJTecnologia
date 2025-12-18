@@ -167,6 +167,27 @@ export class AuthService {
     await this.loadUserProfile(data.user.id);
     return data;
   }
+/**
+ * Iniciar sesión con Google OAuth
+ */
+async signInWithGoogle() {
+  try {
+    const { data, error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+
+    if (error) throw error;
+
+    console.log('🔍 OAuth iniciado:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error en signInWithGoogle:', error);
+    throw error;
+  }
+}
 
   async signOut() {
     const { error } = await this.supabase.auth.signOut();

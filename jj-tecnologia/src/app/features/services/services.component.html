@@ -12,15 +12,14 @@
   <!-- Services Grid -->
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 items-stretch">
-      @for (service of services(); track service.title) {
+      @for (service of services(); track service.id) {
       <app-card [hover]="true" class="h-full">
         <div class="flex gap-4 mb-4">
           <div class="bg-primary/10 p-4 rounded-xl flex-shrink-0">
-            <!-- (tu icono svg aquí si lo usas) -->
             <span class="material-symbols-outlined text-primary">construction</span>
           </div>
           <div>
-            <h3 class="text-xl font-semibold">{{ service.title }}</h3>
+            <h3 class="text-xl font-semibold">{{ service.name }}</h3>
             <p class="text-sm text-gray-500">{{ service.duration }}</p>
           </div>
         </div>
@@ -43,8 +42,6 @@
       </app-card>
       }
     </div>
-
-    <!-- (opcional) Why & CTA aquí -->
   </div>
 </main>
 
@@ -55,13 +52,12 @@
   <div class="absolute inset-0 bg-black/40" (click)="closeModal()"></div>
 
   <!-- dialog -->
-  <div
-    class="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden h-full max-h-[95vh] flex flex-col">
+  <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden h-full max-h-[95vh] flex flex-col">
     <!-- header -->
     <div class="flex items-center justify-between px-6 py-4 border-b flex-shrink-0">
       <div>
         <h3 class="text-xl font-semibold">Solicitar servicio</h3>
-        <p class="text-sm text-gray-500">{{ selectedService()?.title }}</p>
+        <p class="text-sm text-gray-500">{{ selectedService()?.name }}</p>
       </div>
       <button class="p-2 rounded-md hover:bg-gray-100" (click)="closeModal()">✕</button>
     </div>
@@ -75,15 +71,11 @@
         <div class="lg:col-span-2">
           <!-- tabs -->
           <div class="flex gap-6 mb-6">
-            <div class="pb-2 border-b-2" [class.border-primary]="modalStep()===1"
-              [class.border-transparent]="modalStep()!==1">
-              <span class="text-sm" [class.text-primary]="modalStep()===1" [class.text-gray-500]="modalStep()!==1">1.
-                Fecha y Hora</span>
+            <div class="pb-2 border-b-2" [class.border-primary]="modalStep()===1" [class.border-transparent]="modalStep()!==1">
+              <span class="text-sm" [class.text-primary]="modalStep()===1" [class.text-gray-500]="modalStep()!==1">1. Fecha y Hora</span>
             </div>
-            <div class="pb-2 border-b-2" [class.border-primary]="modalStep()===2"
-              [class.border-transparent]="modalStep()!==2">
-              <span class="text-sm" [class.text-primary]="modalStep()===2" [class.text-gray-500]="modalStep()!==2">2.
-                Detalles</span>
+            <div class="pb-2 border-b-2" [class.border-primary]="modalStep()===2" [class.border-transparent]="modalStep()!==2">
+              <span class="text-sm" [class.text-primary]="modalStep()===2" [class.text-gray-500]="modalStep()!==2">2. Detalles</span>
             </div>
           </div>
 
@@ -94,17 +86,23 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-2">Fecha</label>
-                <input type="date" (input)="date.set($any($event.target).value)"
+                <input type="date" 
+                  [value]="date()" 
+                  (input)="onDateChange($event)"
                   class="w-full px-4 py-2 border rounded-lg">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2">Hora</label>
                 <select
-                  class="text- w-full px-2 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                  [value]="time()" (change)="onTimeChange($event)">
-                  <option value=""disabled>Selecciona una hora</option>
-                  @for (h of hours; track h) {
-                  <option [value]="h">{{ h }}</option>
+                  class="w-full px-2 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  [value]="time()" 
+                  (change)="onTimeChange($event)" 
+                  [disabled]="!date() || isLoadingHours()">
+                  <option value="" disabled>
+                    {{ isLoadingHours() ? 'Cargando horarios...' : 'Selecciona una hora' }}
+                  </option>
+                  @for (h of availableHours(); track h.value) {
+                  <option [value]="h.value">{{ h.label }}</option>
                   }
                 </select>
               </div>
@@ -123,32 +121,56 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-2">Nombre</label>
-                <input type="text" (input)="name.set($any($event.target).value)"
+                <input type="text" 
+                  [value]="name()"
+                  (input)="onNameChange($event)"
                   class="w-full px-4 py-2 border rounded-lg">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-2">Teléfono</label>
-                <input type="text" (input)="phone.set($any($event.target).value)"
+                <input type="text" 
+                  [value]="phone()"
+                  (input)="onPhoneChange($event)"
+                  class="w-full px-4 py-2 border rounded-lg">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium mb-2">Email</label>
+                <input type="email" 
+                  [value]="email()"
+                  (input)="onEmailChange($event)"
                   class="w-full px-4 py-2 border rounded-lg">
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium mb-2">Dirección</label>
-                <input type="text" (input)="address.set($any($event.target).value)"
+                <input type="text" 
+                  [value]="address()"
+                  (input)="onAddressChange($event)"
                   class="w-full px-4 py-2 border rounded-lg">
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium mb-2">Notas (opcional)</label>
                 <textarea rows="3"
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
-                  [value]="notes()" (input)="onNotesChange($event)"></textarea>
+                  [value]="notes()" 
+                  (input)="onNotesChange($event)"></textarea>
               </div>
             </div>
+
+            @if (errorMessage()) {
+            <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p class="text-sm text-red-600">{{ errorMessage() }}</p>
+            </div>
+            }
 
             <div class="flex items-center justify-between mt-6">
               <button class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100" (click)="prevStep()">
                 Volver
               </button>
-              <app-button [disabled]="!name() || !phone() || !address()" (click)="submitRequest()">Confirmar solicitud</app-button>
+              <app-button 
+                [disabled]="!name() || !email() || !phone() || !address() || isLoading()" 
+                (click)="submitRequest()">
+                {{ isLoading() ? 'Enviando...' : 'Confirmar solicitud' }}
+              </app-button>
             </div>
           </div>
           }
@@ -162,7 +184,7 @@
               <div class="flex items-start gap-2">
                 <span class="material-symbols-outlined text-primary">sell</span>
                 <div>
-                  <p class="font-medium">{{ selectedService()?.title }}</p>
+                  <p class="font-medium">{{ selectedService()?.name }}</p>
                   <p class="text-gray-500">{{ selectedService()?.description }}</p>
                 </div>
               </div>
@@ -221,7 +243,7 @@
                 <span class="material-symbols-outlined text-primary">construction</span>
                 <div class="flex-1">
                   <p class="text-sm text-gray-500">Servicio</p>
-                  <p class="font-medium text-gray-900">{{ selectedService()?.title }}</p>
+                  <p class="font-medium text-gray-900">{{ selectedService()?.name }}</p>
                 </div>
               </div>
 
@@ -238,6 +260,14 @@
                 <div class="flex-1">
                   <p class="text-sm text-gray-500">Cliente</p>
                   <p class="font-medium text-gray-900">{{ name() }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary">email</span>
+                <div class="flex-1">
+                  <p class="text-sm text-gray-500">Email</p>
+                  <p class="font-medium text-gray-900">{{ email() }}</p>
                 </div>
               </div>
 

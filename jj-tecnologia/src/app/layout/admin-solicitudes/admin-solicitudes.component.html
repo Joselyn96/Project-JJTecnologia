@@ -1,0 +1,327 @@
+<div class="space-y-6">
+  
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Solicitudes de Servicios</h1>
+      <p class="text-sm text-gray-600 mt-1">Gestiona las solicitudes de servicios de tus clientes</p>
+    </div>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Total</p>
+          <p class="text-2xl font-bold text-gray-900">{{ getTotalRequests() }}</p>
+        </div>
+        <span class="material-symbols-outlined text-3xl text-gray-400">list</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Pendientes</p>
+          <p class="text-2xl font-bold text-yellow-600">{{ getPendingCount() }}</p>
+        </div>
+        <span class="material-symbols-outlined text-3xl text-yellow-400">schedule</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Aceptadas</p>
+          <p class="text-2xl font-bold text-green-600">{{ getAcceptedCount() }}</p>
+        </div>
+        <span class="material-symbols-outlined text-3xl text-green-400">check_circle</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Completadas</p>
+          <p class="text-2xl font-bold text-blue-600">{{ getCompletedCount() }}</p>
+        </div>
+        <span class="material-symbols-outlined text-3xl text-blue-400">task_alt</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white rounded-lg border border-gray-200 p-4">
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Búsqueda -->
+      <div class="flex-1">
+        <input
+          type="text"
+          placeholder="Buscar por cliente, servicio, email o teléfono..."
+          [value]="searchTerm()"
+          (input)="onSearchChange($any($event.target).value)"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <!-- Filtro por estado -->
+      <select
+        [value]="selectedStatus()"
+        (change)="onStatusFilterChange($any($event.target).value)"
+        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <option value="TODAS">Todos los estados</option>
+        <option value="PENDIENTE">Pendientes</option>
+        <option value="ACEPTADO">Aceptadas</option>
+        <option value="RECHAZADO">Rechazadas</option>
+        <option value="COMPLETADO">Completadas</option>
+        <option value="CANCELADO">Canceladas</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+    </div>
+  }
+
+  <!-- No hay solicitudes -->
+  @else if (filteredRequests().length === 0) {
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+      <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">construction</span>
+      <h2 class="text-xl font-semibold text-gray-900 mb-2">No hay solicitudes</h2>
+      <p class="text-gray-600">
+        @if (searchTerm() || selectedStatus() !== 'TODAS') {
+          No se encontraron solicitudes con los filtros aplicados
+        } @else {
+          Aún no hay solicitudes de servicio registradas
+        }
+      </p>
+    </div>
+  }
+
+  <!-- Lista de solicitudes -->
+  @else {
+    <div class="space-y-4">
+      @for (request of filteredRequests(); track request.id) {
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+          
+          <!-- Header -->
+          <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Solicitud #{{ request.id }}</h3>
+                <p class="text-sm text-gray-600 mt-1">
+                  <span class="material-symbols-outlined text-sm align-middle">schedule</span>
+                  Solicitado: {{ formatDate(request.date_requested!) }}
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <span 
+                  [class]="getStatusBadgeClass(request.status)"
+                  class="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">{{ getStatusIcon(request.status) }}</span>
+                  {{ getStatusText(request.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información del servicio -->
+          <div class="px-6 py-4 bg-blue-50 border-b border-blue-100">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-blue-600">construction</span>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-900">{{ request.service_name }}</h4>
+                <p class="text-sm text-gray-600 mt-1">{{ request.service_description }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalles -->
+          <div class="px-6 py-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-3">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-gray-500">calendar_today</span>
+                  <div>
+                    <p class="text-gray-600">Fecha y Hora</p>
+                    <p class="font-medium text-gray-900">{{ formatDateTime(request.scheduled_date) }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-gray-500">person</span>
+                  <div>
+                    <p class="text-gray-600">Cliente</p>
+                    <p class="font-medium text-gray-900">{{ request.customer_name }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-gray-500">phone</span>
+                  <div>
+                    <p class="text-gray-600">Teléfono</p>
+                    <p class="font-medium text-gray-900">{{ request.customer_phone }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-gray-500">email</span>
+                  <div>
+                    <p class="text-gray-600">Email</p>
+                    <p class="font-medium text-gray-900">{{ request.customer_email }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2 text-sm">
+              <span class="material-symbols-outlined text-gray-500">location_on</span>
+              <div>
+                <p class="text-gray-600">Dirección</p>
+                <p class="font-medium text-gray-900">{{ request.customer_address }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notas del cliente -->
+          @if (request.customer_notes) {
+            <div class="px-6 py-3 bg-amber-50 border-t border-amber-100">
+              <p class="text-sm">
+                <span class="material-symbols-outlined text-sm align-middle text-amber-600">note</span>
+                <span class="font-medium text-gray-700">Notas del cliente:</span>
+                <span class="text-gray-600 ml-2">{{ request.customer_notes }}</span>
+              </p>
+            </div>
+          }
+
+          <!-- Respuesta del admin -->
+          @if (request.rejection_reason) {
+            <div class="px-6 py-3 bg-red-50 border-t border-red-100">
+              <p class="text-sm">
+                <span class="material-symbols-outlined text-sm align-middle text-red-600">info</span>
+                <span class="font-medium text-red-700">Motivo de rechazo:</span>
+                <span class="text-red-600 ml-2">{{ request.rejection_reason }}</span>
+              </p>
+            </div>
+          }
+
+          @if (request.admin_note) {
+            <div class="px-6 py-3 bg-green-50 border-t border-green-100">
+              <p class="text-sm">
+                <span class="material-symbols-outlined text-sm align-middle text-green-600">chat</span>
+                <span class="font-medium text-green-700">Nota del administrador:</span>
+                <span class="text-green-600 ml-2">{{ request.admin_note }}</span>
+              </p>
+            </div>
+          }
+
+          <!-- Acciones -->
+          @if (request.status === 'PENDIENTE') {
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-3">
+              <button
+                (click)="openModal(request, 'accept')"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span>Aceptar</span>
+              </button>
+              <button
+                (click)="openModal(request, 'reject')"
+                class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <span class="material-symbols-outlined text-sm">cancel</span>
+                <span>Rechazar</span>
+              </button>
+            </div>
+          }
+
+          @if (request.status === 'ACEPTADO') {
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+              <button
+                (click)="openModal(request, 'complete')"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <span class="material-symbols-outlined text-sm">task_alt</span>
+                <span>Marcar como Completado</span>
+              </button>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- MODAL -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black opacity-50" (click)="closeModal()"></div>
+    
+    <!-- Contenido del modal -->
+    <div class="bg-white rounded-lg max-w-md w-full p-6 relative z-10 shadow-xl">
+      
+      @if (modalAction() === 'accept') {
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Aceptar Solicitud</h2>
+        <p class="text-gray-600 mb-4">¿Confirmas que aceptas esta solicitud de servicio?</p>
+        
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Nota adicional (opcional)
+        </label>
+        <textarea
+          [(ngModel)]="adminNote"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="Ej: Confirmaremos la hora exacta por teléfono"></textarea>
+      }
+
+      @if (modalAction() === 'reject') {
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Rechazar Solicitud</h2>
+        <p class="text-gray-600 mb-4">Indica el motivo del rechazo:</p>
+        
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Motivo de rechazo *
+        </label>
+        <textarea
+          [(ngModel)]="rejectionReason"
+          rows="3"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+          placeholder="Ej: No hay disponibilidad en esa fecha"></textarea>
+      }
+
+      @if (modalAction() === 'complete') {
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Marcar como Completado</h2>
+        <p class="text-gray-600 mb-4">¿Confirmas que el servicio se ha completado exitosamente?</p>
+        
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Nota final (opcional)
+        </label>
+        <textarea
+          [(ngModel)]="adminNote"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Ej: Servicio completado satisfactoriamente"></textarea>
+      }
+
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeModal()"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+          Cancelar
+        </button>
+        <button
+          (click)="confirmAction()"
+          [class]="modalAction() === 'accept' ? 'bg-green-600 hover:bg-green-700' : 
+                   modalAction() === 'reject' ? 'bg-red-600 hover:bg-red-700' : 
+                   'bg-blue-600 hover:bg-blue-700'"
+          class="flex-1 px-4 py-2 text-white rounded-lg transition">
+          Confirmar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

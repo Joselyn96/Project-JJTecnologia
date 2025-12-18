@@ -1,0 +1,317 @@
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Reportes y Análisis</h1>
+            <p class="text-sm text-gray-600 mt-1">Análisis detallado de ventas, servicios y clientes</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+                <input type="date" [(ngModel)]="fechaDesde"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+                <input type="date" [(ngModel)]="fechaHasta"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <button (click)="applyFilters()"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Aplicar Filtros
+            </button>
+
+            <button (click)="exportCSV()"
+                class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Exportar CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+        <!-- Tab Headers -->
+        <div class="flex border-b border-gray-200">
+            <button (click)="setActiveTab('ventas')" [class.bg-blue-50]="activeTab() === 'ventas'"
+                [class.text-blue-600]="activeTab() === 'ventas'" [class.border-b-2]="activeTab() === 'ventas'"
+                [class.border-blue-600]="activeTab() === 'ventas'"
+                class="flex-1 px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                Ventas
+            </button>
+
+            <button (click)="setActiveTab('servicios')" [class.bg-blue-50]="activeTab() === 'servicios'"
+                [class.text-blue-600]="activeTab() === 'servicios'" [class.border-b-2]="activeTab() === 'servicios'"
+                [class.border-blue-600]="activeTab() === 'servicios'"
+                class="flex-1 px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                Servicios
+            </button>
+
+            <button (click)="setActiveTab('clientes')" [class.bg-blue-50]="activeTab() === 'clientes'"
+                [class.text-blue-600]="activeTab() === 'clientes'" [class.border-b-2]="activeTab() === 'clientes'"
+                [class.border-blue-600]="activeTab() === 'clientes'"
+                class="flex-1 px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                Clientes
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+
+            <!-- Loading -->
+            @if (isLoading()) {
+            <div class="flex justify-center items-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+            }
+
+            <!-- TAB 1: VENTAS -->
+            @else if (activeTab() === 'ventas') {
+            <div class="space-y-6">
+
+                <h2 class="text-xl font-bold text-gray-900">Productos por Categoría</h2>
+
+                <!-- Tabla de ventas por categoría -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Categoría</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Cantidad</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @for (item of ventasPorCategoria(); track item.categoria) {
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                    item.categoria }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ item.cantidad }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{
+                                    formatCurrency(item.valor) }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TODO: Agregar gráfico de barras aquí -->
+                <!-- <div class="bg-gray-50 rounded-lg p-8 text-center">
+            <p class="text-gray-600">📊 Gráfico de barras - Por implementar</p>
+          </div> -->
+                <app-category-bar-chart [data]="ventasPorCategoria()"></app-category-bar-chart>
+
+            </div>
+            }
+
+            <!-- TAB 2: SERVICIOS -->
+            @else if (activeTab() === 'servicios') {
+            <div class="space-y-6">
+
+                <h2 class="text-xl font-bold text-gray-900">Análisis de Servicios</h2>
+
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <p class="text-sm text-blue-600 mb-1">Total Servicios</p>
+                        <p class="text-3xl font-bold text-blue-900">{{ totalServicios() }}</p>
+                    </div>
+
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <p class="text-sm text-green-600 mb-1">Tasa de Aceptación</p>
+                        <p class="text-3xl font-bold text-green-900">{{ tasaAceptacion().toFixed(1) }}%</p>
+                    </div>
+
+                    <div class="bg-red-50 rounded-lg p-4">
+                        <p class="text-sm text-red-600 mb-1">Tasa de Rechazo</p>
+                        <p class="text-3xl font-bold text-red-900">{{ tasaRechazo().toFixed(1) }}%</p>
+                    </div>
+                </div>
+
+                <!-- Servicios por Estado -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Servicios por Estado</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Estado</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Cantidad</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @for (item of serviciosPorEstado(); track item.estado) {
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                        item.estado }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ item.cantidad }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{
+                                        item.porcentaje.toFixed(1) }}%</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TODO: Agregar gráfico circular aquí -->
+                    <!-- <div class="bg-gray-50 rounded-lg p-8 text-center mt-4">
+              <p class="text-gray-600">📊 Gráfico circular - Por implementar</p>
+            </div> -->
+                    <app-service-status-pie-chart [data]="serviciosPorEstado()"
+                        class="mt-4"></app-service-status-pie-chart>
+                </div>
+
+                <!-- Servicios por Tipo -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Servicios por Tipo</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tipo</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @for (item of serviciosPorTipo(); track item.tipo) {
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                        item.tipo }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ item.cantidad }}
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TODO: Agregar gráfico de barras aquí -->
+                    <!-- <div class="bg-gray-50 rounded-lg p-8 text-center mt-4">
+              <p class="text-gray-600">📊 Gráfico de barras - Por implementar</p>
+            </div> -->
+                    <app-service-type-bar-chart [data]="serviciosPorTipo()" class="mt-4"></app-service-type-bar-chart>
+                </div>
+
+            </div>
+            }
+
+            <!-- TAB 3: CLIENTES -->
+            @else if (activeTab() === 'clientes') {
+            <div class="space-y-6">
+
+                <h2 class="text-xl font-bold text-gray-900">Análisis de Clientes</h2>
+
+                <!-- KPI -->
+                <div class="bg-blue-50 rounded-lg p-6">
+                    <p class="text-sm text-blue-600 mb-1">Total Clientes Atendidos en el Período</p>
+                    <p class="text-4xl font-bold text-blue-900">{{ totalClientesAtendidos() }}</p>
+                </div>
+
+                <!-- Gráfico de crecimiento -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Crecimiento de Clientes</h3>
+
+                    <!-- TODO: Agregar gráfico de línea aquí -->
+                    <!-- <div class="bg-gray-50 rounded-lg p-8 text-center">
+              <p class="text-gray-600">📈 Gráfico de línea - Por implementar</p>
+            </div> -->
+                    <app-clients-line-chart [data]="clientesPorMes()"></app-clients-line-chart>
+
+                </div>
+
+                <!-- Top clientes por compras -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 10 Clientes por Compras</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Cliente</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total Compras</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Monto Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @for (cliente of topClientesPorCompras(); track cliente.nombre) {
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                        cliente.nombre }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ cliente.compras }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{
+                                        formatCurrency(cliente.monto) }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Top clientes por servicios -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 10 Clientes por Servicios</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Cliente</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total Servicios</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @for (cliente of topClientesPorServicios(); track cliente.nombre) {
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
+                                        cliente.nombre }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ cliente.servicios
+                                        }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            }
+
+        </div>
+    </div>
+
+</div>

@@ -156,4 +156,24 @@ private supabase: SupabaseClient;
     }
   }
 
+  async getLowStockProducts(minStock: number = 5): Promise<{ count: number; products: Product[] }> {
+  try {
+    const { data, error } = await this.supabase
+      .from('products')
+      .select('*')
+      .lt('stock', minStock)
+      .eq('active', true)
+      .order('stock', { ascending: true });
+
+    if (error) throw error;
+
+    return {
+      count: data?.length || 0,
+      products: data || []
+    };
+  } catch (error) {
+    console.error('❌ Error al cargar productos con bajo stock:', error);
+    return { count: 0, products: [] };
+  }
+}
 }
