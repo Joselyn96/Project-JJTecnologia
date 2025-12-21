@@ -37,7 +37,6 @@ export class CartService {
     return this.cartItems();
   }
 
-  // ✅ AGREGAR ESTE MÉTODO COMPLETO
   addToCart(product: Product, quantity: number = 1) {
     // Validación: el producto debe tener ID
     if (!product.id) {

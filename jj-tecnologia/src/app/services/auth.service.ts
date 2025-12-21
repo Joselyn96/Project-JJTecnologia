@@ -59,23 +59,23 @@ export class AuthService {
   }
 
   async checkSession() {
-    console.log('🔍 Verificando sesión...'); // ← TEMPORAL para debug
+    console.log('Verificando sesión...'); // ← TEMPORAL para debug
   
   const { data } = await this.supabase.auth.getSession();
   
-  console.log('🔍 Sesión obtenida:', data.session); // ← TEMPORAL para debug
+  console.log('Sesión obtenida:', data.session); // ← TEMPORAL para debug
   
   if (data.session) {
     this.isAuthenticated.set(true);
     this.currentUser.set(data.session.user);
     await this.loadUserProfile(data.session.user.id);
     
-    console.log('✅ Usuario autenticado:', {
+    console.log('Usuario autenticado:', {
       email: data.session.user.email,
       profile: this.userProfile()
     }); // ← TEMPORAL para debug
   } else {
-    console.log('❌ No hay sesión activa'); // ← TEMPORAL para debug
+    console.log('No hay sesión activa'); // ← TEMPORAL para debug
   }
   }
 
@@ -108,7 +108,7 @@ export class AuthService {
 
     // 2. Verificar si el trigger creó el usuario en public.users
     if (data.user) {
-      console.log('✅ Usuario creado en auth.users:', data.user.id);
+      console.log('Usuario creado en auth.users:', data.user.id);
 
       // Esperar un poco para que el trigger se ejecute
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -121,12 +121,12 @@ export class AuthService {
         .maybeSingle();
 
       if (checkError) {
-        console.error('⚠️ Error verificando usuario:', checkError);
+        console.error('Error verificando usuario:', checkError);
       }
 
       // Si NO existe, crearlo manualmente
       if (!existingUser) {
-        console.log('⚠️ Trigger no funcionó, creando usuario manualmente...');
+        console.log('Trigger no funcionó, creando usuario manualmente...');
         
         const { error: insertError } = await this.supabase
           .from('users')
@@ -142,15 +142,15 @@ export class AuthService {
           throw new Error('Error al crear el perfil de usuario');
         }
 
-        console.log('✅ Usuario creado manualmente en public.users');
+        console.log('Usuario creado manualmente en public.users');
       } else {
-        console.log('✅ Usuario ya existe en public.users (trigger funcionó)');
+        console.log('Usuario ya existe en public.users (trigger funcionó)');
       }
     }
 
     return data;
   } catch (error: any) {
-    console.error('❌ Error en signUp:', error);
+    console.error('Error en signUp:', error);
     throw error;
   }
   }
@@ -182,10 +182,10 @@ async signInWithGoogle() {
 
     if (error) throw error;
 
-    console.log('🔍 OAuth iniciado:', data);
+    console.log('OAuth iniciado:', data);
     return data;
   } catch (error) {
-    console.error('❌ Error en signInWithGoogle:', error);
+    console.error('Error en signInWithGoogle:', error);
     throw error;
   }
 }
@@ -197,7 +197,7 @@ async signInWithGoogle() {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.userProfile.set(null);
-    // 🛒 Limpiar carrito al cerrar sesión
+    // limpiar carrito al cerrar sesión
   this.cartService.clearCartOnLogout();
   }
 }
